@@ -70,15 +70,17 @@ var ViewModel = function(map, landmarks) {
 	this.landmarkList = ko.observableArray([]);
 	this.infoWindow = new google.maps.InfoWindow();
 
-	function Landmarks(data) {
+	function Landmarks(data, position) {
 		this.name = data.name;
 		this.latlngLoc = data.latlngLoc;
 		this.marker = null;
+		this.position = position;
+		this.setVisible = null;
 	}
 
 	// Adds Landmark site names to list in DOM
-	landmarks.forEach(function(lmarks) {
-		self.landmarkList.push(new Landmarks(lmarks));
+	landmarks.forEach(function(lmarks, position) {
+		self.landmarkList.push(new Landmarks(lmarks, position));
 	});
 	// console.log(landmarks);
 
@@ -103,7 +105,7 @@ var ViewModel = function(map, landmarks) {
 		// Onclick event to bounce markers and populate info window
 		marker.addListener('click', function(){
 			populateInfoWindow(this);
-			toggleBounce();
+			toggleBounce(this);
 			// self.infoWindow.setContent(
 			// 	'<div>' + marker.title + '</div>');
 			// self.infoWindow.open(map, marker);
@@ -135,25 +137,25 @@ var ViewModel = function(map, landmarks) {
 	}
 
 	function toggleBounce(markers) {
-		if (marker.getAnimation() !== null) {
-			marker.setAnimation(null);
+		if (markers.getAnimation() !== null) {
+			markers.setAnimation(null);
 		} else {
-			marker.setAnimation(google.maps.Animation.BOUNCE);
+			markers.setAnimation(google.maps.Animation.BOUNCE);
 		}
 	}
 
-	function bounceTimer () {
+	function bounceTimer (markers) {
 		setTimeout(function() {
-			marker.setAnimation(null);
+			markers.setAnimation(null);
 		}, 5000);
 	}
 
-	this.listClick = function(markers) {
-		console.log('I was clicked');
+	this.listClick = function(clickedLandmark) {
+		console.log(clickedLandmark);
 		// self.infoWindow.setContent('<div>' + self.landmarkList.title + '</div>');
-		populateInfoWindow(marker);
-		toggleBounce(marker);
-		bounceTimer(marker);
+		populateInfoWindow(markers[clickedLandmark.position]);
+		toggleBounce(markers[clickedLandmark.position]);
+		bounceTimer(markers[clickedLandmark.position]);
 	}
 
 	// Knockout Observable for Filtering
@@ -167,9 +169,10 @@ var ViewModel = function(map, landmarks) {
 			return self.landmarkList();
 		} else {
 			console.log('Filtering');
-			return ko.utils.arrayFilter(self.landmarkList(), function(markers) {
-				var match = marker.title.toLowerCase().indexOf(filter.toLowerCase(markers)) !== -1;
-				marker.setVisible(match);
+			return ko.utils.arrayFilter(self.landmarkList(), function(filteredMarker) {
+				console.log(filteredMarker);
+				var match = filteredMarker.title.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+				filteredMarker.markers.setVisible(match);
 				return match
 
 				// // Initial attempt at filtering. Trouble with the stringStartsWith.
