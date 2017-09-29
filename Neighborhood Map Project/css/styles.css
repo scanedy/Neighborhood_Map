@@ -1,0 +1,128 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.container {
+	height: 100%;
+	position: relative;
+}
+
+#drawer {
+
+}
+
+.output-list {
+	background: #efe9e4;
+	border: 1px solid #999;
+	border-right: 3px;
+	height: 100%;
+	line-height: 35px;
+	padding: 10px 10px 30px 10px;
+	text-align: left;
+}
+
+h1 {
+	color: #19a0d8;
+	text-align: center;
+	font-style: italic;
+}
+
+input {
+	width: 48%;
+}
+
+.list {
+	color: #e85113;
+}
+
+#map {
+	height: 100%;
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+}
+
+@media screen and (min-width: 1px) and (max-width: 500px) {
+	h1 {
+		font-size: 10px;
+	}
+
+	.list {
+		font-size: 1.0em;
+	}
+
+	#drawer {
+		width: 300px;
+		height: 100%;
+		position: absolute;
+		transform: translate(-300px, 0);
+		transition: transform 0.3s ease;
+	}
+
+	#map {
+		width: 100%;
+	}
+	/*.nav div {
+		height: 4px;
+		margin: 5px 0;
+		border-radius: 25px;
+		background-color: black;
+	}
+
+	.nav {
+		width: 30px;
+		display: block;
+		margin: 1em 0 0 1em;
+	}*/
+}
+
+@media screen and (min-width: 501px) and (max-width: 800px) {
+	#map {
+		left: 200px;
+	}
+
+	.output-list {
+		width: 180px;
+	}
+	h1 {
+		font-size: 18px;
+	}
+	.list {
+		font-size: 12px
+	}
+	input {
+		width: 40%;
+	}
+	}
+
+@media screen and (min-width: 801px) and (max-width: 1000px) {
+	#map {
+		left: 300px;
+	}
+
+	.output-list {
+		width: 280px;
+	}
+	h1 {
+		font-size: 22px;
+	}
+	.list {
+		font-size: 16px
+	}
+	input {
+		width: 40%;
+	}
+}
+
+@media screen and (min-width: 1001px) {
+	#map {
+		left: 362px;
+	}
+
+	.output-list {
+		width: 340px;
+	}
+}

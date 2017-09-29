@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<meta charset='utf-8'>
+	<link href='css/styles.css' rel='stylesheet' type='text/css'>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	<title>Neighborhood Map Project</title>
+</head>
+<body>
+	<div class='container'>
+
+		<div class='output-list' id='drawer'>
+			<h1>Landmarks and Historic Sites</h1>
+			<hr>
+			<div>				
+				<input id='search-text' type='text' placeholder='Search Sites' data-bind="value: filteredText, valueUpdate: 'afterkeydown'">	
+				<input id='search' type='button' value='Search'>
+			</div>
+			<hr>
+			<div class='list'>
+				<ul data-bind='foreach: filteredLandmark, click: listClick'>
+					<li class='site-name' data-bind='text: name'></li>
+				</ul>
+			</div>
+		</div>
+
+		<div class='api-container'>
+			
+		</div>
+	
+		<!-- <a href='#' class='nav'>
+				<div class='one'></div>
+				<div class='two'></div>
+				<div class='three'></div>
+		</a> -->
+
+		<div id='map'></div>
+
+	</div>
+
+	<script src="js/lib/knockout-3.2.0.js"></script>
+	<script src="js/app.js" type="text/javascript"></script>
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA9N3UMeYRFNHykkksWNFc7IA0vU5HoI4&v=3&callback=initMap" onerror="loadError()"></script>
+</body>
+</html>
