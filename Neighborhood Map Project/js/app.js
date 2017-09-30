@@ -49,7 +49,7 @@ var landmarks = [
 		latlngLoc: {lat: 30.2660703, lng: -97.76913479999999},
 	},
 	{
-		name: '360 Bridge/Pennybacker Bridge',
+		name: '360 Bridge / Pennybacker Bridge',
 		latlngLoc: {lat: 30.3516437, lng: -97.79701449999999},
 	},
 	{
@@ -75,7 +75,7 @@ var ViewModel = function(map, landmarks) {
 		this.latlngLoc = data.latlngLoc;
 		this.marker = null;
 		this.position = position;
-		this.setVisible = null;
+		// this.setVisible = null;
 	}
 
 	// Adds Landmark site names to list in DOM
@@ -165,15 +165,17 @@ var ViewModel = function(map, landmarks) {
 	this.filteredLandmark = ko.computed(function() {
 		var filter = self.filteredText().toLowerCase();
 		if(!filter) {
-			// If there is not a filter, then return the whole list.
+			// If there is not a filter, then return the whole list and markers.
 			return self.landmarkList();
+			// Add default to show all markers.
 		} else {
 			console.log('Filtering');
 			return ko.utils.arrayFilter(self.landmarkList(), function(filteredMarker) {
 				console.log(filteredMarker);
-				var match = filteredMarker.title.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-				filteredMarker.markers.setVisible(match);
-				return match
+				var match = filteredMarker.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+				markers[filteredMarker.position].setVisible(match);
+				return match;
+				return populateInfoWindow(filteredMarker.position);
 
 				// // Initial attempt at filtering. Trouble with the stringStartsWith.
 				// var stringStartsWith = function(string, startsWith) {
@@ -187,6 +189,8 @@ var ViewModel = function(map, landmarks) {
 		}
 		
 	});
+
+	// Add Flickr API to List View
 }
 
 
@@ -204,5 +208,5 @@ function initMap() {
 };
 
 function loadError() {
-	alert('An error ocurred during page load. Please try again');
+	alert('An error ocurred during page load. Please try again later');
 };
