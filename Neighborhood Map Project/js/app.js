@@ -58,15 +58,15 @@ var landmarks = [
 	},
 	{
 		name: 'Zilker Park',
-		latlngLoc: {lat: 30.2669624, lng: -97.77285930000001},	
+		latlngLoc: {lat: 30.2669624, lng: -97.77285930000001},
 	}
-]
+];
 
 var ViewModel = function(map, landmarks) {
 	var self = this;
 
 	this.googleMap = map;
-	this.marker = [];
+	this.markers = [];
 	this.landmarkList = ko.observableArray([]);
 	this.infoWindow = new google.maps.InfoWindow();
 
@@ -85,43 +85,55 @@ var ViewModel = function(map, landmarks) {
 	// console.log(landmarks);
 
 	// // Adds Makers to the DOM
-	var bounds = new google.maps.LatLngBounds();
-
-	for (i = 0; i < landmarks.length; i++) {
-		var position = landmarks[i].latlngLoc;
-		var title = landmarks[i].name;
-
+	this.markers.forEach(function(lmarks) {
+		console.log(lmarks);
 		var marker = new google.maps.Marker({
-			position: position,
-			map: map,
-			title: title, 
+			position: lmarks.latlngLoc,
+			map: self.googleMap,
+			title: lmarks.name,
 			animation: google.maps.Animation.DROP
 		});
-		//console.log(position);
-		// Push markers to global arrays marker.
-		markers.push(marker);
 
+		lmarks.marker.addListener('click', function() {
+			populateInfoWindow();
+			toggleBounce();
+			setTimeout();
+		})
 
-		// Onclick event to bounce markers and populate info window
-		marker.addListener('click', function(){
-			populateInfoWindow(this);
-			toggleBounce(this);
-			// self.infoWindow.setContent(
-			// 	'<div>' + marker.title + '</div>');
-			// self.infoWindow.open(map, marker);
-			// this.setAnimation(google.maps.Animation.BOUNCE);
-			bounceTimer(this);
-			console.log(marker);
-		});
+	})
 
-		// // Onclick event to open Info Window
-		// marker.addListener('click', function(){
-		// 	populateInfoWindow(this, infoWindow);
-		// });
+	// var bounds = new google.maps.LatLngBounds();
 
-		bounds.extend(markers[i].position);
-	}
-	map.fitBounds(bounds);
+	// for (i = 0; i < landmarks.length; i++) {
+	// 	var position = landmarks[i].latlngLoc;
+	// 	var title = landmarks[i].name;
+
+	// 	var marker = new google.maps.Marker({
+	// 		position: position,
+	// 		map: map,
+	// 		title: title,
+	// 		animation: google.maps.Animation.DROP
+	// 	});
+	// 	// console.log(position);
+
+	// 	// Onclick event to bounce markers and populate info window
+	// 	marker.addListener('click', function(){
+	// 		populateInfoWindow(this);
+	// 		toggleBounce(this);
+	// 		// self.infoWindow.setContent(
+	// 		// 	'<div>' + marker.title + '</div>');
+	// 		// self.infoWindow.open(map, marker);
+	// 		// this.setAnimation(google.maps.Animation.BOUNCE);
+	// 		bounceTimer(this);
+	// 		// console.log(marker);
+	// 	});
+
+	// 	// Push markers to global arrays marker.
+	// 	markers.push(marker);
+
+	// 	bounds.extend(markers[i].position);
+	// }
+	// map.fitBounds(bounds);
 
 	function populateInfoWindow(markers, infoWindow) {
 		//console.log('populateInfoWindow');
@@ -131,7 +143,7 @@ var ViewModel = function(map, landmarks) {
 			// Make sure the marker property is cleared if window is closed
 			self.infoWindow.addListener('closeclick', function() {
 				self.infoWindow.marker = null;
-			})
+			});
 			//console.log(markers);
 		}
 	}
@@ -152,11 +164,10 @@ var ViewModel = function(map, landmarks) {
 
 	this.listClick = function(clickedLandmark) {
 		console.log(clickedLandmark);
-		// self.infoWindow.setContent('<div>' + self.landmarkList.title + '</div>');
 		populateInfoWindow(markers[clickedLandmark.position]);
 		toggleBounce(markers[clickedLandmark.position]);
 		bounceTimer(markers[clickedLandmark.position]);
-	}
+	};
 
 	// Knockout Observable for Filtering
 	this.filteredText = ko.observable('');
@@ -169,13 +180,13 @@ var ViewModel = function(map, landmarks) {
 			return self.landmarkList();
 			// Add default to show all markers.
 		} else {
-			console.log('Filtering');
+			// console.log('Filtering');
 			return ko.utils.arrayFilter(self.landmarkList(), function(filteredMarker) {
-				console.log(filteredMarker);
+				// console.log(filteredMarker);
 				var match = filteredMarker.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
 				markers[filteredMarker.position].setVisible(match);
 				return match;
-				return populateInfoWindow(filteredMarker.position);
+				// return populateInfoWindow(filteredMarker.position);
 
 				// // Initial attempt at filtering. Trouble with the stringStartsWith.
 				// var stringStartsWith = function(string, startsWith) {
@@ -183,16 +194,49 @@ var ViewModel = function(map, landmarks) {
 				// 	if(startsWith.length > string.length)
 				// 		return false;
 				// 	return string.substring(0, startsWith.length) === startsWith;
-				// };	
+				// };
 				// return stringStartsWith(lmarks.name.toLowerCase().filter);
 			});
 		}
-		
+
 	});
 
 	// Add Flickr API to List View
-}
+	this.loadFlickr = function() {
+		var $flickrHeader = $('#flickr-header');
+		var $flickrElem = $('#flickr-images');
 
+		// Clear out old data before new request
+		$flickrElem.text('');
+
+		var key = '88e693240daad97978bc4d93c370fd18';
+		var secret = '78ab07255ac49f98';
+
+			var flickrRequestTimeout = setTimeout(function() {
+			$flickrElem.text('Failed to load Flickr Images');
+		}, 9000);
+
+		var landmark = $('#search-text');
+		    var location = landmark.val();
+
+			var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
+
+			$.getJSON(flickrURl, function (data) {
+				console.log(data);
+				var images = data.photos.photo;
+				for (var i = 0; i < images.length; i++) {
+					var farmID = images[i].farm;
+					var serverID = images[i].server;
+					var photoID = images[i].id;
+					var secretID = images[i].secret; 
+					var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + photoID + '_' + secret + '.jpg';
+					$flickrElem.append('<li class=image><img src="'> + url + '""></li>');
+					console.log('add Images');
+				}
+			});
+			clearTimeout(flickrRequestTimeout);
+		};
+};
 
 function initMap() {
 	//Constructor creates a new map.
@@ -205,8 +249,8 @@ function initMap() {
 	viewModel = new ViewModel(googleMap, landmarks);
 	//Makes it go.
 	ko.applyBindings(viewModel);
-};
+}
 
 function loadError() {
 	alert('An error ocurred during page load. Please try again later');
-};
+}
