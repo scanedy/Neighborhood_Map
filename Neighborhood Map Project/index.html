@@ -8,37 +8,34 @@
 	<title>Neighborhood Map Project</title>
 </head>
 <body>
-	<div class='container'>
 
-		<div class='output-list' id='drawer'>
-			<h1>Landmarks and Historic Sites</h1>
+	<div id='container'>
+
+		<div>
+			<h1>Austin, Texas Landmarks</h1>
 			<hr>
-			<div>				
-				<input id='search-text' type='text' placeholder='Search Sites' data-bind="value: filteredText, valueUpdate: 'afterkeydown'">	
-				<input id='search' type='button' value='Search'>
+			<div>
+				<input id='search-text' type='text' placeholder='Select Site' data-bind="value: filteredText, valueUpdate: 'afterkeydown'">
 			</div>
 			<hr>
 			<div class='list'>
-				<ul data-bind='foreach: filteredLandmark, click: listClick'>
-					<li class='site-name' data-bind='text: name'></li>
+				<ul data-bind='foreach: filteredLandmark'>
+					<li class='site-name' data-bind='text: name, click: $parent.listClick'></li>
 				</ul>
 			</div>
 		</div>
-
-		<div class='api-container'>
-			
+		<hr>
+		<div class='flickr-container'>
+			<h3 id='flickr-header'>Search Selected Site Images on Flickr</h3>
+			<input id='flickr-btn' type='button' value='Search Selected Site' data-bind='click: loadFlickr'>
+			<ul id='flickr-images'></ul>
 		</div>
-	
-		<!-- <a href='#' class='nav'>
-				<div class='one'></div>
-				<div class='two'></div>
-				<div class='three'></div>
-		</a> -->
-
-		<div id='map'></div>
 
 	</div>
 
+	<div id='map' data-bind='markers'></div>
+
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="js/lib/knockout-3.2.0.js"></script>
 	<script src="js/app.js" type="text/javascript"></script>
 	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA9N3UMeYRFNHykkksWNFc7IA0vU5HoI4&v=3&callback=initMap" onerror="loadError()"></script>
