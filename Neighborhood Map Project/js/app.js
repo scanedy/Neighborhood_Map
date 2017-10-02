@@ -86,14 +86,14 @@ function Landmarks(data, position) {
 
 function populateInfoWindow(marker) {
 	console.log('populateInfoWindow');
-		infoWindow.marker != marker;
-		infoWindow.setContent('<div>' + marker.title + '</div>');
-		infoWindow.open(googleMap, marker);
-		// Make sure the marker property is cleared if window is closed
-		infoWindow.addListener('closeclick', function() {
-			infoWindow.marker = null;
-		});
-		//console.log(markers);
+	infoWindow.marker != marker;
+	infoWindow.setContent('<div>' + marker.title + '</div>');
+	infoWindow.open(googleMap, marker);
+	// Make sure the marker property is cleared if window is closed
+	infoWindow.addListener('closeclick', function() {
+		infoWindow.marker = null;
+	});
+	//console.log(markers);
 }
 
 function toggleBounce(marker) {
