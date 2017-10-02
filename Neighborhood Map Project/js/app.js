@@ -25,7 +25,8 @@ var styles = [
         stylers: [ { color: '#efe9e4' }, { lightness: -25 }]}
 ];
 
-var map;
+var googleMap;
+var infoWindow;
 var markers = [];
 var landmarks = [
 	{
@@ -62,21 +63,59 @@ var landmarks = [
 	}
 ];
 
+function Landmarks(data, position) {
+	this.name = data.name;
+	this.latlngLoc = data.latlngLoc;
+	this.marker = new google.maps.Marker({
+		position: data.latlngLoc,
+		map: googleMap,
+		title: data.name,
+		animation: google.maps.Animation.DROP
+	});
+	this.position = position;
+	// this.setVisible = null;
+
+	// Onclick event to bounce markers and populate info window
+	this.marker.addListener('click', function(){
+		populateInfoWindow(this);
+		toggleBounce(this);
+		bounceTimer(this);
+		// console.log(marker);
+	});
+}
+
+function populateInfoWindow(marker) {
+	console.log('populateInfoWindow');
+		infoWindow.marker != marker;
+		infoWindow.setContent('<div>' + marker.title + '</div>');
+		infoWindow.open(googleMap, marker);
+		// Make sure the marker property is cleared if window is closed
+		infoWindow.addListener('closeclick', function() {
+			infoWindow.marker = null;
+		});
+		//console.log(markers);
+}
+
+function toggleBounce(marker) {
+	if (marker.getAnimation() !== null) {
+		marker.setAnimation(null);
+	} else {
+		marker.setAnimation(google.maps.Animation.BOUNCE);
+	}
+}
+
+function bounceTimer (marker) {
+	setTimeout(function() {
+		marker.setAnimation(null);
+	}, 5000);
+}
+
 var ViewModel = function(map, landmarks) {
 	var self = this;
 
 	this.googleMap = map;
 	this.markers = [];
 	this.landmarkList = ko.observableArray([]);
-	this.infoWindow = new google.maps.InfoWindow();
-
-	function Landmarks(data, position) {
-		this.name = data.name;
-		this.latlngLoc = data.latlngLoc;
-		this.marker = null;
-		this.position = position;
-		// this.setVisible = null;
-	}
 
 	// Adds Landmark site names to list in DOM
 	landmarks.forEach(function(lmarks, position) {
@@ -84,24 +123,7 @@ var ViewModel = function(map, landmarks) {
 	});
 	// console.log(landmarks);
 
-	// // Adds Makers to the DOM
-	this.markers.forEach(function(lmarks) {
-		console.log(lmarks);
-		var marker = new google.maps.Marker({
-			position: lmarks.latlngLoc,
-			map: self.googleMap,
-			title: lmarks.name,
-			animation: google.maps.Animation.DROP
-		});
-
-		lmarks.marker.addListener('click', function() {
-			populateInfoWindow();
-			toggleBounce();
-			setTimeout();
-		})
-
-	})
-
+	// // Initial attempt at adding markers and click functionality.
 	// var bounds = new google.maps.LatLngBounds();
 
 	// for (i = 0; i < landmarks.length; i++) {
@@ -135,38 +157,11 @@ var ViewModel = function(map, landmarks) {
 	// }
 	// map.fitBounds(bounds);
 
-	function populateInfoWindow(markers, infoWindow) {
-		//console.log('populateInfoWindow');
-		if (self.infoWindow.markers != markers) {
-			self.infoWindow.setContent('<div>' + markers.title + '</div>');
-			self.infoWindow.open(map, markers);
-			// Make sure the marker property is cleared if window is closed
-			self.infoWindow.addListener('closeclick', function() {
-				self.infoWindow.marker = null;
-			});
-			//console.log(markers);
-		}
-	}
-
-	function toggleBounce(markers) {
-		if (markers.getAnimation() !== null) {
-			markers.setAnimation(null);
-		} else {
-			markers.setAnimation(google.maps.Animation.BOUNCE);
-		}
-	}
-
-	function bounceTimer (markers) {
-		setTimeout(function() {
-			markers.setAnimation(null);
-		}, 5000);
-	}
-
 	this.listClick = function(clickedLandmark) {
 		console.log(clickedLandmark);
-		populateInfoWindow(markers[clickedLandmark.position]);
-		toggleBounce(markers[clickedLandmark.position]);
-		bounceTimer(markers[clickedLandmark.position]);
+		populateInfoWindow(clickedLandmark.marker);
+		toggleBounce(clickedLandmark.marker);
+		bounceTimer(clickedLandmark.marker);
 	};
 
 	// Knockout Observable for Filtering
@@ -184,9 +179,8 @@ var ViewModel = function(map, landmarks) {
 			return ko.utils.arrayFilter(self.landmarkList(), function(filteredMarker) {
 				// console.log(filteredMarker);
 				var match = filteredMarker.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-				markers[filteredMarker.position].setVisible(match);
+				filteredMarker.marker.setVisible(match);
 				return match;
-				// return populateInfoWindow(filteredMarker.position);
 
 				// // Initial attempt at filtering. Trouble with the stringStartsWith.
 				// var stringStartsWith = function(string, startsWith) {
@@ -198,7 +192,6 @@ var ViewModel = function(map, landmarks) {
 				// return stringStartsWith(lmarks.name.toLowerCase().filter);
 			});
 		}
-
 	});
 
 	// Add Flickr API to List View
@@ -217,34 +210,36 @@ var ViewModel = function(map, landmarks) {
 		}, 9000);
 
 		var landmark = $('#search-text');
-		    var location = landmark.val();
+	    var location = landmark.val();
 
-			var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
+		var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
 
-			$.getJSON(flickrURl, function (data) {
-				console.log(data);
-				var images = data.photos.photo;
-				for (var i = 0; i < images.length; i++) {
-					var farmID = images[i].farm;
-					var serverID = images[i].server;
-					var photoID = images[i].id;
-					var secretID = images[i].secret; 
-					var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + photoID + '_' + secret + '.jpg';
-					$flickrElem.append('<li class=image><img src="'> + url + '""></li>');
-					console.log('add Images');
-				}
-			});
-			clearTimeout(flickrRequestTimeout);
-		};
+		$.getJSON(flickrURl, function (data) {
+			console.log(data);
+			var images = data.photos.photo;
+			for (var i = 0; i < images.length; i++) {
+				var farmID = images[i].farm;
+				var serverID = images[i].server;
+				var photoID = images[i].id;
+				var secretID = images[i].secret;
+				var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + photoID + '_' + secret + '.jpg';
+				$flickrElem.append('<li class=image><img src="'> + url + '""></li>');
+				console.log('add Images');
+			}
+		});
+		clearTimeout(flickrRequestTimeout);
+	};
 };
 
 function initMap() {
 	//Constructor creates a new map.
-	var googleMap = new google.maps.Map(document.getElementById('map'), {
+	googleMap = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 30.2672, lng: -97.7431},
 		zoom: 13,
 		styles: styles
 	});
+
+	infoWindow = new google.maps.InfoWindow();
 
 	viewModel = new ViewModel(googleMap, landmarks);
 	//Makes it go.
