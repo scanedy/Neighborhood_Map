@@ -116,6 +116,7 @@ var ViewModel = function(map, landmarks) {
 	this.googleMap = map;
 	this.markers = [];
 	this.landmarkList = ko.observableArray([]);
+	this.loadFlickr = ko.observableArray([]);
 
 	// Adds Landmark site names to list in DOM
 	landmarks.forEach(function(lmarks, position) {
@@ -123,39 +124,76 @@ var ViewModel = function(map, landmarks) {
 	});
 	// console.log(landmarks);
 
-	// // Initial attempt at adding markers and click functionality.
-	// var bounds = new google.maps.LatLngBounds();
+	// Add Flickr API to List View
+	landmarks.forEach(function () {
+		var $flickrHeader = $('#flickr-header');
+		var $flickrElem = $('#flickr-images');
 
-	// for (i = 0; i < landmarks.length; i++) {
-	// 	var position = landmarks[i].latlngLoc;
-	// 	var title = landmarks[i].name;
+		// Clear out old data before new request
+		$flickrElem.text('');
 
-	// 	var marker = new google.maps.Marker({
-	// 		position: position,
-	// 		map: map,
-	// 		title: title,
-	// 		animation: google.maps.Animation.DROP
+		var key = '88e693240daad97978bc4d93c370fd18';
+		var secret = '78ab07255ac49f98';
+
+			var flickrRequestTimeout = setTimeout(function() {
+			$flickrElem.text('Failed to load Flickr Images');
+		}, 9000);
+
+		var landmark = $('#search-text');
+	    var location = landmark.val();
+
+		var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
+
+		$.getJSON(flickrURl, function (data) {
+			console.log(data);
+			var images = data.photos.photo;
+			for (var i = 0; i < images.length; i++) {
+				var farmID = images[i].farm;
+				var serverID = images[i].server;
+				var id = images[i].id;
+				var secret = images[i].secret;
+				var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + id + '_' + secret+ '.jpg';
+				self.loadFlickr.push(new Landmarks('<li class=image><img src="' + url + '""></li>'));
+				console.log('add Images');
+			}
+		});
+		clearTimeout(flickrRequestTimeout);
+	})
+	
+	// this.loadFlickr = function() {
+	// 	var $flickrHeader = $('#flickr-header');
+	// 	var $flickrElem = $('#flickr-images');
+
+	// 	// Clear out old data before new request
+	// 	$flickrElem.text('');
+
+	// 	var key = '88e693240daad97978bc4d93c370fd18';
+	// 	var secret = '78ab07255ac49f98';
+
+	// 		var flickrRequestTimeout = setTimeout(function() {
+	// 		$flickrElem.text('Failed to load Flickr Images');
+	// 	}, 9000);
+
+	// 	var landmark = $('#search-text');
+	//     var location = landmark.val();
+
+	// 	var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
+
+	// 	$.getJSON(flickrURl, function (data) {
+	// 		console.log(data);
+	// 		var images = data.photos.photo;
+	// 		for (var i = 0; i < images.length; i++) {
+	// 			var farmID = images[i].farm;
+	// 			var serverID = images[i].server;
+	// 			var id = images[i].id;
+	// 			var secret = images[i].secret;
+	// 			var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + id + '_' + secret+ '.jpg';
+	// 			$flickrElem.append('<li class=image><img src="' + url + '""></li>');
+	// 			console.log('add Images');
+	// 		}
 	// 	});
-	// 	// console.log(position);
-
-	// 	// Onclick event to bounce markers and populate info window
-	// 	marker.addListener('click', function(){
-	// 		populateInfoWindow(this);
-	// 		toggleBounce(this);
-	// 		// self.infoWindow.setContent(
-	// 		// 	'<div>' + marker.title + '</div>');
-	// 		// self.infoWindow.open(map, marker);
-	// 		// this.setAnimation(google.maps.Animation.BOUNCE);
-	// 		bounceTimer(this);
-	// 		// console.log(marker);
-	// 	});
-
-	// 	// Push markers to global arrays marker.
-	// 	markers.push(marker);
-
-	// 	bounds.extend(markers[i].position);
-	// }
-	// map.fitBounds(bounds);
+	// 	clearTimeout(flickrRequestTimeout);
+	// };
 
 	this.listClick = function(clickedLandmark) {
 		console.log(clickedLandmark);
@@ -193,49 +231,13 @@ var ViewModel = function(map, landmarks) {
 			});
 		}
 	});
-
-	// Add Flickr API to List View
-	this.loadFlickr = function() {
-		var $flickrHeader = $('#flickr-header');
-		var $flickrElem = $('#flickr-images');
-
-		// Clear out old data before new request
-		$flickrElem.text('');
-
-		var key = '88e693240daad97978bc4d93c370fd18';
-		var secret = '78ab07255ac49f98';
-
-			var flickrRequestTimeout = setTimeout(function() {
-			$flickrElem.text('Failed to load Flickr Images');
-		}, 9000);
-
-		var landmark = $('#search-text');
-	    var location = landmark.val();
-
-		var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
-
-		$.getJSON(flickrURl, function (data) {
-			console.log(data);
-			var images = data.photos.photo;
-			for (var i = 0; i < images.length; i++) {
-				var farmID = images[i].farm;
-				var serverID = images[i].server;
-				var photoID = images[i].id;
-				var secretID = images[i].secret;
-				var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + photoID + '_' + secret + '.jpg';
-				$flickrElem.append('<li class=image><img src="'> + url + '""></li>');
-				console.log('add Images');
-			}
-		});
-		clearTimeout(flickrRequestTimeout);
-	};
 };
 
 function initMap() {
 	//Constructor creates a new map.
 	googleMap = new google.maps.Map(document.getElementById('map'), {
-		center: {lat: 30.2672, lng: -97.7431},
-		zoom: 13,
+		center: {lat: 30.2793, lng: -97.7431},
+		zoom: 12,
 		styles: styles
 	});
 
