@@ -27,8 +27,10 @@
 		<hr>
 		<div class='flickr-container'>
 			<h3 id='flickr-header'>Search Selected Site Images on Flickr</h3>
-			<input id='flickr-btn' type='button' value='Search Selected Site'> 
-			<ul id='flickr-images' data-bind='foreach: loadFlickr'>></ul>
+			<input id='flickr-btn' type='button' value='Search Selected Site' data-bind='click: loadFlickr'> 
+			<ul data-bind='foreach: loadFlickr'>
+				<img data-bind='attr: {href: url}'>
+			</ul>
 		</div>
 
 	</div>
