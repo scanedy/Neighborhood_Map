@@ -135,7 +135,7 @@ var ViewModel = function(map, landmarks) {
 		var key = '88e693240daad97978bc4d93c370fd18';
 		var secret = '78ab07255ac49f98';
 
-			var flickrRequestTimeout = setTimeout(function() {
+		var flickrRequestTimeout = setTimeout(function() {
 			$flickrElem.text('Failed to load Flickr Images');
 		}, 9000);
 
@@ -143,6 +143,7 @@ var ViewModel = function(map, landmarks) {
 	    var location = landmark.val();
 
 		var flickrURl = 'https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=' + key + '&text=' + location + '&format=json&nojsoncallback=1';
+		this.url = ko.observable('');
 
 		$.getJSON(flickrURl, function (data) {
 			console.log(data);
@@ -152,8 +153,8 @@ var ViewModel = function(map, landmarks) {
 				var serverID = images[i].server;
 				var id = images[i].id;
 				var secret = images[i].secret;
-				var url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + id + '_' + secret+ '.jpg';
-				self.loadFlickr.push(new Landmarks('<li class=image><img src="' + url + '""></li>'));
+				self.url = 'https://farm' + farmID + '.staticflickr.com/' + serverID + '/' + id + '_' + secret+ '.jpg';
+				self.loadFlickr.push( {url: url} );  // '<li class=image><img src="' + url + '""></li>');
 				console.log('add Images');
 			}
 		});
