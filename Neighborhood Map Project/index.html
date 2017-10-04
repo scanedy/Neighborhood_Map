@@ -3,36 +3,45 @@
 <head>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 	<meta charset='utf-8'>
-	<link href='css/styles.css' rel='stylesheet' type='text/css'>
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 	<title>Neighborhood Map Project</title>
+	<link href='css/bootstrap-3.3.7-dist/css/bootstrap.css' rel='stylesheet' type='text/css'>
+	<link href='css/styles.css' rel='stylesheet' type='text/css'>
+	<link href='css/offcanvas.css' rel='stylesheet' type='text/css'>
 </head>
 <body>
 
+	<div class='visible-xs'>
+		<button class='btn btn-primary btn-sm' data-toggle='offcanvas'>Menu</button>
+	</div>
+
 	<div id='container'>
-
-		<div>
-			<h1>Austin, Texas Landmarks</h1>
-			<hr>
-			<div>
-				<input id='search-text' type='text' placeholder='Select Site' data-bind="value: filteredText, valueUpdate: 'afterkeydown'">
-			</div>
-			<hr>
-			<div class='list'>
-				<ul data-bind='foreach: filteredLandmark'>
-					<li class='site-name' data-bind='text: name, click: $parent.listClick'></li>
-				</ul>
+		<div class='row row-offcanvas row-offcanvas-left'>
+			<div class='sidebar-offcanvas'>
+				<h1>Austin, Texas Landmarks</h1>
+				<hr>	
+				
+				<div>	
+					<div>
+						<input id='search-text' type='text' placeholder='Select Site' data-bind="value: filteredText, valueUpdate: 'afterkeydown'">
+					</div>
+					<hr>
+					<div class='list'>
+						<ul data-bind='foreach: filteredLandmark'>
+							<li class='site-name' data-bind='text: name, click: $parent.listClick'></li>
+						</ul>
+					</div>
+				</div>
+				<hr>
+				<div class='flickr-container'>
+					<h3 id='flickr-header'>Search Site on Flickr</h3>
+					<input id='flickr-btn' type='button' value='Search' data-bind='click: loadFlickr'> 
+					<ul data-bind='foreach: loadFlickr'>
+						<img data-bind='attr: {src: url}'>
+					</ul>
+				</div>
 			</div>
 		</div>
-		<hr>
-		<div class='flickr-container'>
-			<h3 id='flickr-header'>Search Selected Site Images on Flickr</h3>
-			<input id='flickr-btn' type='button' value='Search Selected Site' data-bind='click: loadFlickr'> 
-			<ul data-bind='foreach: loadFlickr'>
-				<img data-bind='attr: {href: url}'>
-			</ul>
-		</div>
-
 	</div>
 
 	<div id='map' data-bind='markers'></div>
@@ -40,6 +49,8 @@
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="js/lib/knockout-3.2.0.js"></script>
 	<script src="js/app.js" type="text/javascript"></script>
+	<script src="css/bootstrap-3.3.7-dist/js/bootstrap.js" type="text/javascript"></script>
+	<script src="js/offcanvas.js" type="text/javascript"></script>
 	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA9N3UMeYRFNHykkksWNFc7IA0vU5HoI4&v=3&callback=initMap" onerror="loadError()"></script>
 </body>
 </html>
